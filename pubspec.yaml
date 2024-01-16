@@ -1,0 +1,71 @@
+name: hakata_file_manager
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding
+      path: plugins/window_size
+
+  cupertino_icons: ^1.0.2
+  fluent_ui: ^4.8.2
+  desktop_drop: ^0.4.4
+  cross_file: ^0.3.3+8
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  path: ^1.8.3
+  path_provider: ^2.1.2
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.1
+  syncfusion_flutter_pdfviewer: ^24.1.41
+  flutter_launcher_icons: ^0.13.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+  msix: ^3.16.7
+
+msix_config:
+  display_name: 羽方青果専用ファイル管理ソフト
+  publisher_display_name: 有限会社アゴラ・クリエーション
+  identity_name: AB4E4D12.26750E4BFCF72
+  msix_version: 1.0.0.0
+  logo_path: assets/images/icon.png
+  languages: ja-jp
+  publisher: CN=B7179693-D78E-46A3-AB96-E087B93111AE
+  store: true
+  architecture: x64
+  capabilities: ""
+flutter_launcher_icons:
+  windows:
+    generate: true
+    image_path: assets/images/icon.png
+    icon_size: 48
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: SourceHanSansJP-Bold
+      fonts:
+        - asset: assets/fonts/SourceHanSansJP-Bold.otf
+    - family: SourceHanSansJP-Regular
+      fonts:
+        - asset: assets/fonts/SourceHanSansJP-Regular.otf
