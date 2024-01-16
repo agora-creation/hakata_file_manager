@@ -14,7 +14,7 @@ class ConnectionSQLiteService {
     return _instance!;
   }
 
-  static const DATABASE_NAME = 'hakata_file_manager20231228.db';
+  static const DATABASE_NAME = 'hakata_file_manager20240116.db';
   static const DATABASE_VERSION = 1;
   Database? _db;
 

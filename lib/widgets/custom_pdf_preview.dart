@@ -1,121 +1,55 @@
-import 'package:cross_file/cross_file.dart';
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
-import 'package:hakata_file_manager/services/client.dart';
-import 'package:hakata_file_manager/services/file.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_text_box.dart';
+import 'package:path/path.dart' as p;
 
-class PreviewContainer extends StatefulWidget {
-  final List<XFile> uploadFiles;
-  final Function() getFiles;
+class CustomPdfPreview extends StatelessWidget {
+  final List<File> files;
+  final int index;
+  final Function()? leftOnPressed;
+  final Function()? rightOnPressed;
+  final TextEditingController clientNumberController;
+  final String clientName;
+  final FocusNode numberFocusNode;
+  final Function(String)? clientNumberOnChanged;
+  final Function()? clientSearchOnPressed;
+  final Function()? allClearOnPressed;
+  final Function()? clearOnPressed;
+  final Function()? saveOnPressed;
 
-  const PreviewContainer({
-    required this.uploadFiles,
-    required this.getFiles,
+  const CustomPdfPreview({
+    required this.files,
+    required this.index,
+    required this.leftOnPressed,
+    required this.rightOnPressed,
+    required this.clientNumberController,
+    required this.clientName,
+    required this.numberFocusNode,
+    required this.clientNumberOnChanged,
+    required this.clientSearchOnPressed,
+    required this.allClearOnPressed,
+    required this.clearOnPressed,
+    required this.saveOnPressed,
     super.key,
   });
 
   @override
-  State<PreviewContainer> createState() => _PreviewContainerState();
-}
-
-class _PreviewContainerState extends State<PreviewContainer> {
-  ClientService clientService = ClientService();
-  FileService fileService = FileService();
-  int index = 0;
-  String clientNumber = '';
-  String clientName = '';
-
-  void pageLeft() {
-    setState(() {
-      index -= 1;
-      clientNumber = '';
-      clientName = '';
-    });
-  }
-
-  void pageRight() {
-    setState(() {
-      index += 1;
-      clientNumber = '';
-      clientName = '';
-    });
-  }
-
-  void uploadCancel() {
-    setState(() {
-      widget.uploadFiles.clear();
-    });
-  }
-
-  void inputClientNumber(String value) {
-    clientNumber = value;
-  }
-
-  void selectClient() async {
-    List<Map> tmpClients = await clientService.select(searchMap: {
-      'number': clientNumber,
-    });
-    if (tmpClients.isNotEmpty) {
-      setState(() {
-        clientName = tmpClients.first['name'];
-      });
-    }
-  }
-
-  void notSave() {
-    setState(() {
-      widget.uploadFiles.removeAt(index);
-      if (widget.uploadFiles.isNotEmpty) {
-        index = 0;
-        clientNumber = '';
-        clientName = '';
-      } else {
-        widget.uploadFiles.clear();
-      }
-    });
-  }
-
-  void save() async {
-    String? error = await fileService.insert(
-      clientNumber: clientNumber,
-      clientName: clientName,
-      uploadFile: widget.uploadFiles[index],
-    );
-    if (error != null) {
-      if (!mounted) return;
-      showMessage(context, error, false);
-      return;
-    }
-    setState(() {
-      widget.uploadFiles.removeAt(index);
-      if (widget.uploadFiles.isNotEmpty) {
-        index = 0;
-        clientNumber = '';
-        clientName = '';
-      } else {
-        widget.uploadFiles.clear();
-      }
-    });
-    widget.getFiles();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.uploadFiles.isEmpty) {
+    if (files.isEmpty) {
       return Container();
     }
     bool isLeft = false;
     bool isRight = false;
-    if (widget.uploadFiles.asMap().containsKey(index - 1)) {
+    if (files.asMap().containsKey(index - 1)) {
       isLeft = true;
     }
-    if (widget.uploadFiles.asMap().containsKey(index + 1)) {
+    if (files.asMap().containsKey(index + 1)) {
       isRight = true;
     }
-    XFile currentUploadFile = widget.uploadFiles[index];
+    File file = files[index];
 
     return Container(
       color: blackColor.withOpacity(0.6),
@@ -136,7 +70,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                         style: ButtonStyle(
                           backgroundColor: ButtonState.all(whiteColor),
                         ),
-                        onPressed: () => pageLeft(),
+                        onPressed: leftOnPressed,
                       )
                     : Container(),
               ),
@@ -165,7 +99,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                   Align(
                                     alignment: Alignment.centerRight,
                                     child: Text(
-                                      '${index + 1} / ${widget.uploadFiles.length}',
+                                      '${index + 1} / ${files.length}',
                                       style: const TextStyle(fontSize: 16),
                                     ),
                                   ),
@@ -173,12 +107,10 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                   InfoLabel(
                                     label: '取引先番号',
                                     child: CustomTextBox(
-                                      controller: TextEditingController(
-                                        text: clientNumber,
-                                      ),
-                                      onChanged: (value) {
-                                        inputClientNumber(value);
-                                      },
+                                      focusNode: numberFocusNode,
+                                      controller: clientNumberController,
+                                      maxLines: 1,
+                                      onChanged: clientNumberOnChanged,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -199,7 +131,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                           labelText: '取引先番号から取得',
                                           labelColor: whiteColor,
                                           backgroundColor: greyColor,
-                                          onPressed: () => selectClient(),
+                                          onPressed: clientSearchOnPressed,
                                         ),
                                       ],
                                     ),
@@ -208,7 +140,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                   InfoLabel(
                                     label: 'ファイル名',
                                     child: Text(
-                                      currentUploadFile.name,
+                                      p.basename(file.path),
                                       style: const TextStyle(fontSize: 18),
                                     ),
                                   ),
@@ -223,7 +155,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                     labelText: 'アップロードを全てキャンセルする',
                                     labelColor: whiteColor,
                                     backgroundColor: redColor,
-                                    onPressed: () => uploadCancel(),
+                                    onPressed: allClearOnPressed,
                                   ),
                                   const SizedBox(width: 8),
                                   CustomIconTextButton(
@@ -232,7 +164,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                     labelText: '保存しない',
                                     labelColor: whiteColor,
                                     backgroundColor: greyColor,
-                                    onPressed: () => notSave(),
+                                    onPressed: clearOnPressed,
                                   ),
                                   const SizedBox(width: 8),
                                   CustomIconTextButton(
@@ -241,7 +173,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                                     labelText: '保存する',
                                     labelColor: whiteColor,
                                     backgroundColor: blueColor,
-                                    onPressed: () => save(),
+                                    onPressed: saveOnPressed,
                                   ),
                                 ],
                               ),
@@ -264,7 +196,7 @@ class _PreviewContainerState extends State<PreviewContainer> {
                         style: ButtonStyle(
                           backgroundColor: ButtonState.all(whiteColor),
                         ),
-                        onPressed: () => pageRight(),
+                        onPressed: rightOnPressed,
                       )
                     : Container(),
               ),

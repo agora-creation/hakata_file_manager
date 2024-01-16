@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:cross_file/cross_file.dart';
-import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
@@ -12,8 +11,7 @@ import 'package:hakata_file_manager/services/file.dart';
 import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_file_card.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
-import 'package:hakata_file_manager/widgets/dragging_container.dart';
-import 'package:hakata_file_manager/widgets/preview_container.dart';
+import 'package:hakata_file_manager/widgets/custom_pdf_preview.dart';
 import 'package:path/path.dart' as p;
 
 class HomeScreen extends StatefulWidget {
@@ -24,32 +22,137 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  ClientService clientService = ClientService();
   FileService fileService = FileService();
   List<Map<String, String>> files = [];
-  final List<XFile> uploadFiles = [];
-  bool isDragging = false;
+  String selectDirectoryPath = '';
+  List<File> uploadFiles = [];
+  int uploadFilesIndex = 0;
+  String inputClientNumber = '';
+  String inputClientName = '';
+  FocusNode numberFocusNode = FocusNode();
 
-  void _getFiles() async {
-    files.clear();
-    String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
-    List<Map> tmpFiles = await fileService.select(searchMap: {
-      'clientNumber': tmpClientNumber,
-    });
+  void _init() async {
+    await Future.delayed(const Duration(seconds: 1));
+    await _selectDirectory();
+  }
+
+  Future _selectDirectory() async {
+    String? path = await FilePicker.platform.getDirectoryPath();
+    uploadFiles.clear();
+    uploadFilesIndex = 0;
+    inputClientNumber = '';
+    inputClientName = '';
+    if (path != null) {
+      Directory directory = Directory(path);
+      selectDirectoryPath = directory.path;
+      List<FileSystemEntity> dirFiles = await directory.list().toList();
+      for (var file in dirFiles) {
+        if (file is File) {
+          String extension = p.extension(file.path);
+          if (extension == '.pdf') {
+            uploadFiles.add(file);
+          }
+        }
+      }
+    }
+    setState(() {});
+  }
+
+  void _uploadFileLeft() {
     setState(() {
-      for (Map map in tmpFiles) {
-        files.add({
-          'clientNumber': map['clientNumber'],
-          'clientName': map['clientName'],
-          'filePath': map['filePath'],
-        });
+      uploadFilesIndex -= 1;
+      inputClientNumber = '';
+      inputClientName = '';
+    });
+  }
+
+  void _uploadFileRight() {
+    setState(() {
+      uploadFilesIndex += 1;
+      inputClientNumber = '';
+      inputClientName = '';
+    });
+  }
+
+  void _selectClient() async {
+    List<Map> tmpClients = await clientService.select(searchMap: {
+      'number': inputClientNumber,
+    });
+    if (tmpClients.isNotEmpty) {
+      setState(() {
+        inputClientName = tmpClients.first['name'];
+      });
+    }
+  }
+
+  void _uploadFilesClear() {
+    setState(() {
+      uploadFiles.clear();
+      uploadFilesIndex = 0;
+      inputClientNumber = '';
+      inputClientName = '';
+    });
+  }
+
+  void _uploadFileClear() {
+    setState(() {
+      uploadFiles.removeAt(uploadFilesIndex);
+      if (uploadFiles.isNotEmpty) {
+        uploadFilesIndex = 0;
+        inputClientNumber = '';
+        inputClientName = '';
+      } else {
+        uploadFiles.clear();
       }
     });
+  }
+
+  void _uploadFileSave() async {
+    String? error = await fileService.insert(
+      clientNumber: inputClientNumber,
+      clientName: inputClientName,
+      uploadFile: uploadFiles[uploadFilesIndex],
+    );
+    if (error != null) {
+      if (!mounted) return;
+      showMessage(context, error, false);
+      return;
+    }
+    setState(() {
+      uploadFiles.removeAt(uploadFilesIndex);
+      if (uploadFiles.isNotEmpty) {
+        uploadFilesIndex = 0;
+        inputClientNumber = '';
+        inputClientName = '';
+      } else {
+        uploadFiles.clear();
+      }
+    });
+    _getFiles();
+  }
+
+  void _getFiles() async {
+    //   files.clear();
+    //   String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
+    //   List<Map> tmpFiles = await fileService.select(searchMap: {
+    //     'clientNumber': tmpClientNumber,
+    //   });
+    //   setState(() {
+    //     for (Map map in tmpFiles) {
+    //       files.add({
+    //         'clientNumber': map['clientNumber'],
+    //         'clientName': map['clientName'],
+    //         'filePath': map['filePath'],
+    //       });
+    //     }
+    //   });
   }
 
   @override
   void initState() {
     super.initState();
-    _getFiles();
+    _init();
   }
 
   @override
@@ -94,66 +197,77 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    CustomIconTextButton(
+                      iconData: FluentIcons.folder,
+                      iconColor: whiteColor,
+                      labelText: 'フォルダ選択',
+                      labelColor: whiteColor,
+                      backgroundColor: greyColor,
+                      onPressed: () async {
+                        await _selectDirectory();
+                      },
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          content: DropTarget(
-            onDragDone: (detail) {
-              for (XFile uploadFile in detail.files) {
-                String extension = p.extension(uploadFile.path);
-                if (extension == '.pdf') {
-                  uploadFiles.add(uploadFile);
-                }
-              }
-              setState(() {});
-            },
-            onDragEntered: (detail) {
-              setState(() {
-                isDragging = true;
-              });
-            },
-            onDragExited: (detail) {
-              setState(() {
-                isDragging = false;
-              });
-            },
-            child: Container(
-              color: mainColor,
-              child: Stack(
-                children: [
-                  const Center(child: Text('PDFファイルをドラッグ＆ドロップしてください')),
-                  GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: homeGridDelegate,
-                    itemCount: files.length,
-                    itemBuilder: (context, index) {
-                      Map<String, String> file = files[index];
-                      String fileName = p.basename('${file['filePath']}');
-                      return CustomFileCard(
-                        fileName: fileName,
-                        onTap: () => Navigator.push(
-                          context,
-                          FluentPageRoute(
-                            builder: (context) => PDFViewScreen(
-                              file: File('${file['filePath']}'),
-                            ),
-                            fullscreenDialog: true,
-                          ),
-                        ),
-                      );
-                    },
+          content: Container(
+            color: mainColor,
+            child: Stack(
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('取得先フォルダパス:'),
+                      Text(selectDirectoryPath),
+                    ],
                   ),
-                  isDragging ? const DraggingContainer() : Container(),
-                ],
-              ),
+                ),
+                GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: homeGridDelegate,
+                  itemCount: files.length,
+                  itemBuilder: (context, index) {
+                    Map<String, String> file = files[index];
+                    String fileName = p.basename('${file['filePath']}');
+                    return CustomFileCard(
+                      fileName: fileName,
+                      onTap: () => Navigator.push(
+                        context,
+                        FluentPageRoute(
+                          builder: (context) => PDFViewScreen(
+                            file: File('${file['filePath']}'),
+                          ),
+                          fullscreenDialog: true,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        PreviewContainer(
-          uploadFiles: uploadFiles,
-          getFiles: _getFiles,
+        CustomPdfPreview(
+          files: uploadFiles,
+          index: uploadFilesIndex,
+          leftOnPressed: () => _uploadFileLeft(),
+          rightOnPressed: () => _uploadFileRight(),
+          clientNumberController: TextEditingController(
+            text: inputClientNumber,
+          ),
+          clientName: inputClientName,
+          numberFocusNode: numberFocusNode,
+          clientNumberOnChanged: (value) {
+            inputClientNumber = value;
+          },
+          clientSearchOnPressed: () => _selectClient(),
+          allClearOnPressed: () => _uploadFilesClear(),
+          clearOnPressed: () => _uploadFileClear(),
+          saveOnPressed: () => _uploadFileSave(),
         ),
       ],
     );

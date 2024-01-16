@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:hakata_file_manager/services/connection_sqlite.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -33,7 +32,7 @@ class FileService {
   Future<String?> insert({
     required String clientNumber,
     required String clientName,
-    required XFile uploadFile,
+    required File uploadFile,
   }) async {
     String? error;
     if (clientNumber == '') return '取引先番号を入力してください';
