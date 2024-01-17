@@ -141,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     for (Map map in tmpFiles) {
       files.add({
+        'id': '${map['id']}',
         'clientNumber': map['clientNumber'],
         'clientName': map['clientName'],
         'filePath': map['filePath'],
@@ -238,7 +239,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         FluentPageRoute(
                           builder: (context) => PDFViewScreen(
-                            file: File('${file['filePath']}'),
+                            file: file,
+                            getFiles: _getFiles,
                           ),
                           fullscreenDialog: true,
                         ),
