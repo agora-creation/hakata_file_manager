@@ -37,7 +37,7 @@ const TextStyle headerStyle = TextStyle(
 );
 
 const homeGridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 8,
-  mainAxisSpacing: 16,
-  crossAxisSpacing: 16,
+  crossAxisCount: 5,
+  mainAxisSpacing: 8,
+  crossAxisSpacing: 8,
 );

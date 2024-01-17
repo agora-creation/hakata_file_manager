@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:hakata_file_manager/services/connection_sqlite.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FileService {
@@ -38,17 +35,7 @@ class FileService {
     if (clientNumber == '') return '取引先番号を入力してください';
     if (clientName == '') return '取引先名を入力してください';
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      String savedPath = '${dir.path}/.hakata_file/$clientNumber';
-      String savedFileName = p.basename(uploadFile.path);
-      if (!await Directory(savedPath).exists()) {
-        await Directory(savedPath).create(recursive: true);
-      }
-      Uint8List orgData = await uploadFile.readAsBytes();
-      File savedFile = File('$savedPath/$savedFileName');
-      await savedFile.writeAsBytes(orgData);
       Database db = await _getDatabase();
-      String filePath = '$savedPath/$savedFileName';
       await db.rawInsert('''
         insert into file (
           clientNumber,
@@ -57,7 +44,7 @@ class FileService {
         ) values (
           '$clientNumber',
           '$clientName',
-          '$filePath'
+          '${uploadFile.path}'
         );
       ''');
     } catch (e) {

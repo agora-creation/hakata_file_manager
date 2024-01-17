@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _init() async {
     await Future.delayed(const Duration(seconds: 1));
     await _selectDirectory();
+    _getFiles();
   }
 
   Future _selectDirectory() async {
@@ -133,20 +134,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _getFiles() async {
-    //   files.clear();
-    //   String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
-    //   List<Map> tmpFiles = await fileService.select(searchMap: {
-    //     'clientNumber': tmpClientNumber,
-    //   });
-    //   setState(() {
-    //     for (Map map in tmpFiles) {
-    //       files.add({
-    //         'clientNumber': map['clientNumber'],
-    //         'clientName': map['clientName'],
-    //         'filePath': map['filePath'],
-    //       });
-    //     }
-    //   });
+    files.clear();
+    String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
+    List<Map> tmpFiles = await fileService.select(searchMap: {
+      'clientNumber': tmpClientNumber,
+    });
+    for (Map map in tmpFiles) {
+      files.add({
+        'clientNumber': map['clientNumber'],
+        'clientName': map['clientName'],
+        'filePath': map['filePath'],
+      });
+    }
+    setState(() {});
   }
 
   @override
@@ -232,9 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: files.length,
                   itemBuilder: (context, index) {
                     Map<String, String> file = files[index];
-                    String fileName = p.basename('${file['filePath']}');
                     return CustomFileCard(
-                      fileName: fileName,
+                      file: File('${file['filePath']}'),
                       onTap: () => Navigator.push(
                         context,
                         FluentPageRoute(
