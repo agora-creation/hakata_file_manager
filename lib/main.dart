@@ -41,8 +41,19 @@ class MyApp extends StatelessWidget {
         locale: const Locale('ja'),
         title: appTitle,
         theme: themeData(),
-        home: const HomeScreen(),
+        home: const SplashController(),
       ),
     );
+  }
+}
+
+class SplashController extends StatelessWidget {
+  const SplashController({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final homeProvider = Provider.of<HomeProvider>(context);
+
+    return HomeScreen(homeProvider: homeProvider);
   }
 }

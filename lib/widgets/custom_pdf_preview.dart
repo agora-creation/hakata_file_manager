@@ -167,7 +167,7 @@ class CustomPdfPreview extends StatelessWidget {
                                     CustomIconTextButton(
                                       iconData: FluentIcons.clear,
                                       iconColor: whiteColor,
-                                      labelText: '保存しない',
+                                      labelText: '保存しない(Nキー)',
                                       labelColor: whiteColor,
                                       backgroundColor: greyColor,
                                       onPressed: clearOnPressed,

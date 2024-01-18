@@ -10,7 +10,6 @@ import 'package:path/path.dart' as p;
 class HomeProvider with ChangeNotifier {
   ClientService clientService = ClientService();
   FileService fileService = FileService();
-  List<Map<String, String>> files = [];
   String selectDirectoryPath = '';
   List<File> uploadFiles = [];
   int uploadFilesIndex = 0;
@@ -18,21 +17,21 @@ class HomeProvider with ChangeNotifier {
   FocusNode clientNumberFocusNode = FocusNode();
   String clientName = '';
 
-  Future getFiles() async {
-    files.clear();
+  Future<List<Map<String, String>>> getFiles() async {
+    List<Map<String, String>> ret = [];
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
     List<Map> tmpFiles = await fileService.select(searchMap: {
       'clientNumber': tmpClientNumber,
     });
     for (Map map in tmpFiles) {
-      files.add({
+      ret.add({
         'id': '${map['id']}',
         'clientNumber': map['clientNumber'],
         'clientName': map['clientName'],
         'filePath': map['filePath'],
       });
     }
-    notifyListeners();
+    return ret;
   }
 
   Future selectDirectory() async {

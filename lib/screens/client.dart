@@ -127,8 +127,7 @@ class _ClientScreenState extends State<ClientScreen> {
                   return;
                 }
                 if (!mounted) return;
-                showMessage(context, 'PDFファイル情報を保存しました', true);
-                return;
+                showMessage(context, '取引先設定を保存しました', true);
               },
             ),
           ],

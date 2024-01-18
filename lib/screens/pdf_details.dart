@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/services/file.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
@@ -49,6 +50,7 @@ class _PdfDetailsScreenState extends State<PdfDetailsScreen> {
                 await fileService.delete(id: int.parse('${widget.file['id']}'));
                 await widget.getFiles();
                 if (!mounted) return;
+                showMessage(context, 'PDFファイル情報を削除しました', true);
                 Navigator.pop(context);
               },
             ),
