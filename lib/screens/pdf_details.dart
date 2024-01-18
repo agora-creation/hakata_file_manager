@@ -7,21 +7,21 @@ import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:path/path.dart' as p;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-class PDFViewScreen extends StatefulWidget {
+class PdfDetailsScreen extends StatefulWidget {
   final Map<String, String> file;
   final Function() getFiles;
 
-  const PDFViewScreen({
+  const PdfDetailsScreen({
     required this.file,
     required this.getFiles,
     super.key,
   });
 
   @override
-  State<PDFViewScreen> createState() => _PDFViewScreenState();
+  State<PdfDetailsScreen> createState() => _PdfDetailsScreenState();
 }
 
-class _PDFViewScreenState extends State<PDFViewScreen> {
+class _PdfDetailsScreenState extends State<PdfDetailsScreen> {
   FileService fileService = FileService();
 
   @override
@@ -55,7 +55,11 @@ class _PDFViewScreenState extends State<PDFViewScreen> {
           ],
         ),
       ),
-      content: SfPdfViewer.file(File('${widget.file['filePath']}')),
+      content: Container(
+        color: grey2Color,
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: SfPdfViewer.file(File('${widget.file['filePath']}')),
+      ),
     );
   }
 }

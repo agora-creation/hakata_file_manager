@@ -1,7 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hakata_file_manager/common/style.dart';
+import 'package:hakata_file_manager/providers/home.dart';
 import 'package:hakata_file_manager/screens/home.dart';
+import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 
 Future main() async {
@@ -24,18 +26,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FluentApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: HomeProvider()),
       ],
-      supportedLocales: const [Locale('ja')],
-      locale: const Locale('ja'),
-      title: appTitle,
-      theme: themeData(),
-      home: const HomeScreen(),
+      child: FluentApp(
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('ja')],
+        locale: const Locale('ja'),
+        title: appTitle,
+        theme: themeData(),
+        home: const HomeScreen(),
+      ),
     );
   }
 }

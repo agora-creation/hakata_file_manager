@@ -7,6 +7,7 @@ class CustomTextBox extends StatelessWidget {
   final String? placeholder;
   final int? maxLines;
   final Function(String)? onChanged;
+  final Function(String)? onSubmitted;
 
   const CustomTextBox({
     this.autofocus = false,
@@ -15,6 +16,7 @@ class CustomTextBox extends StatelessWidget {
     this.placeholder,
     this.maxLines,
     this.onChanged,
+    this.onSubmitted,
     Key? key,
   }) : super(key: key);
 
@@ -28,6 +30,7 @@ class CustomTextBox extends StatelessWidget {
       expands: false,
       maxLines: maxLines,
       onChanged: onChanged,
+      onSubmitted: onSubmitted,
     );
   }
 }

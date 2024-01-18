@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/style.dart';
-import 'package:hakata_file_manager/widgets/custom_icon_button.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
-import 'package:hakata_file_manager/widgets/custom_text_box.dart';
+import 'package:hakata_file_manager/widgets/link_text.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class CustomPdfPreview extends StatelessWidget {
@@ -12,12 +11,9 @@ class CustomPdfPreview extends StatelessWidget {
   final int index;
   final Function()? leftOnPressed;
   final Function()? rightOnPressed;
-  final TextEditingController clientNumberController;
+  final Widget inputWidget;
   final String clientName;
-  final FocusNode numberFocusNode;
-  final Function(String)? clientNumberOnChanged;
-  final Function()? clientSearchOnPressed;
-  final Function()? allClearOnPressed;
+  final Function()? allClearOnTap;
   final Function()? clearOnPressed;
   final Function()? saveOnPressed;
 
@@ -26,12 +22,9 @@ class CustomPdfPreview extends StatelessWidget {
     required this.index,
     required this.leftOnPressed,
     required this.rightOnPressed,
-    required this.clientNumberController,
+    required this.inputWidget,
     required this.clientName,
-    required this.numberFocusNode,
-    required this.clientNumberOnChanged,
-    required this.clientSearchOnPressed,
-    required this.allClearOnPressed,
+    required this.allClearOnTap,
     required this.clearOnPressed,
     required this.saveOnPressed,
     super.key,
@@ -77,7 +70,7 @@ class CustomPdfPreview extends StatelessWidget {
               ),
               Expanded(
                 child: Container(
-                  color: grey2Color,
+                  color: blackColor,
                   child: Row(
                     children: [
                       Expanded(
@@ -88,7 +81,7 @@ class CustomPdfPreview extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 1),
                       Expanded(
                         child: Container(
                           color: whiteColor,
@@ -100,22 +93,25 @@ class CustomPdfPreview extends StatelessWidget {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        '${index + 1} / ${files.length}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        LinkText(
+                                          label: 'アップロードを全てキャンセル',
+                                          labelColor: redColor,
+                                          onTap: allClearOnTap,
+                                        ),
+                                        Text(
+                                          '${index + 1} / ${files.length}',
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 16),
                                     InfoLabel(
                                       label: '取引先番号',
-                                      child: CustomTextBox(
-                                        focusNode: numberFocusNode,
-                                        controller: clientNumberController,
-                                        maxLines: 1,
-                                        onChanged: clientNumberOnChanged,
-                                      ),
+                                      child: inputWidget,
                                     ),
                                     const SizedBox(height: 8),
                                     Container(
@@ -125,25 +121,22 @@ class CustomPdfPreview extends StatelessWidget {
                                           bottom: BorderSide(color: blackColor),
                                         ),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          InfoLabel(
-                                            label: '取引先名',
-                                            child: Text(
-                                              clientName,
-                                              style:
-                                                  const TextStyle(fontSize: 16),
-                                            ),
-                                          ),
-                                          CustomIconButton(
-                                            iconData: FluentIcons.search,
-                                            iconColor: whiteColor,
-                                            backgroundColor: greyColor,
-                                            onPressed: clientSearchOnPressed,
-                                          ),
-                                        ],
+                                      child: InfoLabel(
+                                        label: '取引先名',
+                                        child: clientName != ''
+                                            ? Text(
+                                                clientName,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              )
+                                            : const Text(
+                                                '※取引先番号から自動入力されます',
+                                                style: TextStyle(
+                                                  color: greyColor,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -162,20 +155,15 @@ class CustomPdfPreview extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    const Text(
+                                      '※このソフトにPDFファイル自体は保存されません。上記のテキスト情報のみです。',
+                                      style: TextStyle(color: redColor),
+                                    ),
                                   ],
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    CustomIconTextButton(
-                                      iconData: FluentIcons.clear,
-                                      iconColor: whiteColor,
-                                      labelText: 'アップロードを全てキャンセルする',
-                                      labelColor: whiteColor,
-                                      backgroundColor: redColor,
-                                      onPressed: allClearOnPressed,
-                                    ),
-                                    const SizedBox(width: 8),
                                     CustomIconTextButton(
                                       iconData: FluentIcons.clear,
                                       iconColor: whiteColor,
@@ -188,7 +176,7 @@ class CustomPdfPreview extends StatelessWidget {
                                     CustomIconTextButton(
                                       iconData: FluentIcons.save,
                                       iconColor: whiteColor,
-                                      labelText: '保存する',
+                                      labelText: '保存する(Sキー)',
                                       labelColor: whiteColor,
                                       backgroundColor: blueColor,
                                       onPressed: saveOnPressed,

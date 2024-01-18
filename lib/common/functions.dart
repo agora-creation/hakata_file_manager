@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,4 +60,12 @@ String dateText(String format, DateTime? date) {
     ret = DateFormat(format, 'ja').format(date);
   }
   return ret;
+}
+
+Future<bool> checkFileExistence(String filePath) async {
+  if (await File(filePath).exists()) {
+    return true;
+  } else {
+    return false;
+  }
 }

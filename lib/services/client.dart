@@ -15,7 +15,7 @@ class ClientService {
       Database db = await _getDatabase();
       String sql = 'select * from client where id != 0';
       if (searchMap['number'] != '') {
-        sql += " and number like '%${searchMap['number']}%'";
+        sql += " and number like '${searchMap['number']}'";
       }
       sql += ' order by id ASC';
       return await db.rawQuery(sql);
