@@ -16,6 +16,7 @@ class HomeProvider with ChangeNotifier {
   TextEditingController clientNumberController = TextEditingController();
   FocusNode clientNumberFocusNode = FocusNode();
   String clientName = '';
+  FocusNode keyboardFocusNode = FocusNode();
 
   Future<List<Map<String, String>>> getFiles() async {
     List<Map<String, String>> ret = [];

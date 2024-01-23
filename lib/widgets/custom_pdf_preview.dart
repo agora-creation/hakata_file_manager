@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
+import 'package:hakata_file_manager/widgets/custom_text_box.dart';
 import 'package:hakata_file_manager/widgets/link_text.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -11,7 +12,9 @@ class CustomPdfPreview extends StatelessWidget {
   final int index;
   final Function()? leftOnPressed;
   final Function()? rightOnPressed;
-  final Widget inputWidget;
+  final FocusNode clientNumberFocusNode;
+  final TextEditingController clientNumberController;
+  final Function(String)? clientNumberOnSubmitted;
   final String clientName;
   final Function()? allClearOnTap;
   final Function()? clearOnPressed;
@@ -22,7 +25,9 @@ class CustomPdfPreview extends StatelessWidget {
     required this.index,
     required this.leftOnPressed,
     required this.rightOnPressed,
-    required this.inputWidget,
+    required this.clientNumberFocusNode,
+    required this.clientNumberController,
+    required this.clientNumberOnSubmitted,
     required this.clientName,
     required this.allClearOnTap,
     required this.clearOnPressed,
@@ -111,7 +116,12 @@ class CustomPdfPreview extends StatelessWidget {
                                     const SizedBox(height: 16),
                                     InfoLabel(
                                       label: '取引先番号',
-                                      child: inputWidget,
+                                      child: CustomTextBox(
+                                        focusNode: clientNumberFocusNode,
+                                        controller: clientNumberController,
+                                        maxLines: 1,
+                                        onSubmitted: clientNumberOnSubmitted,
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     Container(
@@ -162,21 +172,21 @@ class CustomPdfPreview extends StatelessWidget {
                                   ],
                                 ),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     CustomIconTextButton(
                                       iconData: FluentIcons.clear,
                                       iconColor: whiteColor,
-                                      labelText: '保存しない(Nキー)',
+                                      labelText: '保存しない(BackSpaceキー)',
                                       labelColor: whiteColor,
                                       backgroundColor: greyColor,
                                       onPressed: clearOnPressed,
                                     ),
-                                    const SizedBox(width: 8),
                                     CustomIconTextButton(
                                       iconData: FluentIcons.save,
                                       iconColor: whiteColor,
-                                      labelText: '保存する(Sキー)',
+                                      labelText: '保存する(Enterキー)',
                                       labelColor: whiteColor,
                                       backgroundColor: blueColor,
                                       onPressed: saveOnPressed,

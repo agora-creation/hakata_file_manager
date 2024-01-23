@@ -10,7 +10,6 @@ import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_file_card.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_pdf_preview.dart';
-import 'package:hakata_file_manager/widgets/custom_text_box.dart';
 import 'package:hakata_file_manager/widgets/directory_path_header.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,13 +27,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, String>> files = [];
 
-  void _getFiles() async {
+  Future _getFiles() async {
     files = await widget.homeProvider.getFiles();
     setState(() {});
   }
 
   void _init() async {
-    _getFiles();
+    await _getFiles();
     await Future.delayed(const Duration(seconds: 2));
     await widget.homeProvider.selectDirectory();
     await widget.homeProvider.autoFocus();
@@ -48,110 +47,113 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ScaffoldPage(
-          padding: EdgeInsets.zero,
-          header: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(appTitle, style: headerStyle),
-                Row(
-                  children: [
-                    CustomIconTextButton(
-                      iconData: FluentIcons.search,
-                      iconColor: whiteColor,
-                      labelText: 'ファイル検索',
-                      labelColor: whiteColor,
-                      backgroundColor: lightBlueColor,
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) => SearchDialog(
-                          homeProvider: widget.homeProvider,
+    return RawKeyboardListener(
+      autofocus: true,
+      focusNode: widget.homeProvider.keyboardFocusNode,
+      onKey: (event) async {
+        if (widget.homeProvider.clientNumberFocusNode.hasFocus) return;
+        if (event is RawKeyDownEvent) {
+          if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+            String? error = await widget.homeProvider.uploadFileSave();
+            if (error != null) {
+              if (!mounted) return;
+              showMessage(context, error, false);
+              return;
+            }
+            if (!mounted) return;
+            showMessage(context, 'PDFファイル情報を保存しました', true);
+            widget.homeProvider.uploadFileClear();
+            await widget.homeProvider.autoFocus();
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.backspace)) {
+            widget.homeProvider.uploadFileClear();
+            await widget.homeProvider.autoFocus();
+          }
+        }
+      },
+      child: Stack(
+        children: [
+          ScaffoldPage(
+            padding: EdgeInsets.zero,
+            header: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(appTitle, style: headerStyle),
+                  Row(
+                    children: [
+                      CustomIconTextButton(
+                        iconData: FluentIcons.search,
+                        iconColor: whiteColor,
+                        labelText: 'ファイル検索',
+                        labelColor: whiteColor,
+                        backgroundColor: lightBlueColor,
+                        onPressed: () => showDialog(
+                          context: context,
+                          builder: (context) => SearchDialog(
+                            homeProvider: widget.homeProvider,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    CustomIconTextButton(
-                      iconData: FluentIcons.settings,
-                      iconColor: whiteColor,
-                      labelText: '取引先設定',
-                      labelColor: whiteColor,
-                      backgroundColor: greyColor,
-                      onPressed: () => Navigator.push(
-                        context,
-                        FluentPageRoute(
-                          builder: (context) => const ClientScreen(),
-                          fullscreenDialog: true,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          content: Container(
-            color: mainColor,
-            child: Column(
-              children: [
-                DirectoryPathHeader(
-                  path: widget.homeProvider.selectDirectoryPath,
-                  onTap: () async {
-                    await widget.homeProvider.selectDirectory();
-                    await widget.homeProvider.autoFocus();
-                  },
-                ),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(8),
-                    gridDelegate: homeGridDelegate,
-                    itemCount: files.length,
-                    itemBuilder: (context, index) {
-                      return CustomFileCard(
-                        file: files[index],
-                        onTap: () => Navigator.push(
+                      const SizedBox(width: 8),
+                      CustomIconTextButton(
+                        iconData: FluentIcons.settings,
+                        iconColor: whiteColor,
+                        labelText: '取引先設定',
+                        labelColor: whiteColor,
+                        backgroundColor: greyColor,
+                        onPressed: () => Navigator.push(
                           context,
                           FluentPageRoute(
-                            builder: (context) => PdfDetailsScreen(
-                              file: files[index],
-                              getFiles: _getFiles,
-                            ),
+                            builder: (context) => const ClientScreen(),
                             fullscreenDialog: true,
                           ),
                         ),
-                      );
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            content: Container(
+              color: mainColor,
+              child: Column(
+                children: [
+                  DirectoryPathHeader(
+                    path: widget.homeProvider.selectDirectoryPath,
+                    onTap: () async {
+                      await widget.homeProvider.selectDirectory();
+                      await widget.homeProvider.autoFocus();
                     },
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(8),
+                      gridDelegate: homeGridDelegate,
+                      itemCount: files.length,
+                      itemBuilder: (context, index) {
+                        return CustomFileCard(
+                          file: files[index],
+                          onTap: () => Navigator.push(
+                            context,
+                            FluentPageRoute(
+                              builder: (context) => PdfDetailsScreen(
+                                file: files[index],
+                                getFiles: _getFiles,
+                              ),
+                              fullscreenDialog: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        RawKeyboardListener(
-          focusNode: FocusNode(),
-          onKey: (event) async {
-            if (event is RawKeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.keyS) {
-              String? error = await widget.homeProvider.uploadFileSave();
-              if (error != null) {
-                if (!mounted) return;
-                showMessage(context, error, false);
-                return;
-              }
-              if (!mounted) return;
-              showMessage(context, 'PDFファイル情報を保存しました', true);
-              widget.homeProvider.uploadFileClear();
-              await widget.homeProvider.autoFocus();
-            } else if (event is RawKeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.keyN) {
-              widget.homeProvider.uploadFileClear();
-              await widget.homeProvider.autoFocus();
-            }
-          },
-          child: CustomPdfPreview(
+          CustomPdfPreview(
             files: widget.homeProvider.uploadFiles,
             index: widget.homeProvider.uploadFilesIndex,
             leftOnPressed: () async {
@@ -162,14 +164,12 @@ class _HomeScreenState extends State<HomeScreen> {
               widget.homeProvider.uploadFileRight();
               await widget.homeProvider.autoFocus();
             },
-            inputWidget: CustomTextBox(
-              focusNode: widget.homeProvider.clientNumberFocusNode,
-              controller: widget.homeProvider.clientNumberController,
-              maxLines: 1,
-              onSubmitted: (value) async {
-                await widget.homeProvider.checkClientNumber();
-              },
-            ),
+            clientNumberFocusNode: widget.homeProvider.clientNumberFocusNode,
+            clientNumberController: widget.homeProvider.clientNumberController,
+            clientNumberOnSubmitted: (value) async {
+              await widget.homeProvider.checkClientNumber();
+              widget.homeProvider.keyboardFocusNode.requestFocus();
+            },
             clientName: widget.homeProvider.clientName,
             allClearOnTap: () async {
               widget.homeProvider.uploadFileAllClear();
@@ -192,8 +192,8 @@ class _HomeScreenState extends State<HomeScreen> {
               await widget.homeProvider.autoFocus();
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
