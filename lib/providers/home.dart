@@ -21,8 +21,10 @@ class HomeProvider with ChangeNotifier {
   Future<List<Map<String, String>>> getFiles() async {
     List<Map<String, String>> ret = [];
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
+    String tmpFileName = await getPrefsString('fileName') ?? '';
     List<Map> tmpFiles = await fileService.select(searchMap: {
       'clientNumber': tmpClientNumber,
+      'fileName': tmpFileName,
     });
     for (Map map in tmpFiles) {
       ret.add({

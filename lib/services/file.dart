@@ -19,6 +19,9 @@ class FileService {
       if (searchMap['clientNumber'] != '') {
         sql += " and clientNumber like '%${searchMap['clientNumber']}%'";
       }
+      if (searchMap['fileName'] != '') {
+        sql += " and filePath like '%${searchMap['fileName']}%'";
+      }
       sql += ' order by id ASC';
       return await db.rawQuery(sql);
     } catch (e) {

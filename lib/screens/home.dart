@@ -10,6 +10,7 @@ import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_file_card.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_pdf_preview.dart';
+import 'package:hakata_file_manager/widgets/custom_text_box.dart';
 import 'package:hakata_file_manager/widgets/directory_path_header.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -93,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           context: context,
                           builder: (context) => SearchDialog(
                             homeProvider: widget.homeProvider,
+                            getFiles: _getFiles,
                           ),
                         ),
                       ),
@@ -200,9 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class SearchDialog extends StatefulWidget {
   final HomeProvider homeProvider;
+  final Future Function() getFiles;
 
   const SearchDialog({
     required this.homeProvider,
+    required this.getFiles,
     super.key,
   });
 
@@ -213,7 +217,8 @@ class SearchDialog extends StatefulWidget {
 class _SearchDialogState extends State<SearchDialog> {
   ClientService clientService = ClientService();
   List<Map<String, String>> clients = [];
-  String number = '';
+  String clientNumber = '';
+  String fileName = '';
 
   void _init() async {
     clients.clear();
@@ -227,7 +232,9 @@ class _SearchDialogState extends State<SearchDialog> {
       });
     }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
-    number = tmpClientNumber;
+    clientNumber = tmpClientNumber;
+    String tmpFileName = await getPrefsString('fileName') ?? '';
+    fileName = tmpFileName;
     setState(() {});
   }
 
@@ -251,7 +258,7 @@ class _SearchDialogState extends State<SearchDialog> {
           InfoLabel(
             label: '取引先で絞り込み',
             child: CustomComboBox(
-              value: number,
+              value: clientNumber,
               items: clients.map((e) {
                 return ComboBoxItem(
                   value: '${e['number']}',
@@ -260,7 +267,19 @@ class _SearchDialogState extends State<SearchDialog> {
               }).toList(),
               onChanged: (value) {
                 setState(() {
-                  number = value ?? '';
+                  clientNumber = value ?? '';
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          InfoLabel(
+            label: 'ファイル名で絞り込み,',
+            child: CustomTextBox(
+              controller: TextEditingController(text: fileName),
+              onChanged: (value) {
+                setState(() {
+                  fileName = value;
                 });
               },
             ),
@@ -271,7 +290,8 @@ class _SearchDialogState extends State<SearchDialog> {
         FilledButton(
           onPressed: () async {
             await setPrefsString('clientNumber', '');
-            // await widget.homeProvider.initFiles();
+            await setPrefsString('fileName', '');
+            await widget.getFiles();
             if (!mounted) return;
             Navigator.pop(context);
           },
@@ -282,8 +302,9 @@ class _SearchDialogState extends State<SearchDialog> {
         ),
         FilledButton(
           onPressed: () async {
-            await setPrefsString('clientNumber', number);
-            // await widget.homeProvider.initFiles();
+            await setPrefsString('clientNumber', clientNumber);
+            await setPrefsString('fileName', fileName);
+            await widget.getFiles();
             if (!mounted) return;
             Navigator.pop(context);
           },
