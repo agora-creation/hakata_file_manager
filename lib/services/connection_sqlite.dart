@@ -14,7 +14,7 @@ class ConnectionSQLiteService {
     return _instance!;
   }
 
-  static const DATABASE_NAME = 'hakata_file_manager20240116.db';
+  static const DATABASE_NAME = 'hakata_file_manager20240201.db';
   static const DATABASE_VERSION = 1;
   Database? _db;
 
@@ -22,7 +22,7 @@ class ConnectionSQLiteService {
 
   Future<Database> _openDatabase() async {
     sqfliteFfiInit();
-    final dbDirectory = await getApplicationSupportDirectory();
+    final dbDirectory = await getApplicationDocumentsDirectory();
     final dbFilePath = dbDirectory.path;
     String path = join(dbFilePath, DATABASE_NAME);
     DatabaseFactory databaseFactory = databaseFactoryFfi;

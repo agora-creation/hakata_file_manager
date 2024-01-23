@@ -19,7 +19,16 @@ class DirectoryPathHeader extends StatelessWidget {
         width: double.infinity,
         color: grey2Color,
         padding: const EdgeInsets.all(8),
-        child: Text('接続中のファイルパス: $path'),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('接続中のファイルパス: $path'),
+            const Text(
+              'クリックで変更',
+              style: TextStyle(color: greyColor),
+            ),
+          ],
+        ),
       ),
     );
   }

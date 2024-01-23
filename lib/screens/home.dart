@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _init() async {
     await _getFiles();
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3));
     await widget.homeProvider.selectDirectory();
     await widget.homeProvider.autoFocus();
   }
