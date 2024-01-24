@@ -105,11 +105,11 @@ class _ClientScreenState extends State<ClientScreen> {
               icon: const Icon(FluentIcons.back),
               onPressed: () => Navigator.pop(context),
             ),
-            const Text('取引先設定', style: headerStyle),
+            const Text('取引先一覧', style: headerStyle),
             CustomIconTextButton(
               iconData: FluentIcons.save,
               iconColor: whiteColor,
-              labelText: '設定を保存',
+              labelText: '以下の内容で保存する',
               labelColor: whiteColor,
               backgroundColor: blueColor,
               onPressed: () async {
@@ -146,6 +146,9 @@ class _ClientScreenState extends State<ClientScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          'ここで取引先情報を登録できます。PDFファイル情報を保存する際に必要になりますので、かならず1つ以上登録してください。',
+                        ),
                         CustomClientTable(rows: clientRows),
                         const SizedBox(height: 8),
                         Row(
@@ -156,9 +159,9 @@ class _ClientScreenState extends State<ClientScreen> {
                             CustomIconTextButton(
                               iconData: FluentIcons.add,
                               iconColor: whiteColor,
-                              labelText: '取引先を追加',
+                              labelText: '入力欄を追加',
                               labelColor: whiteColor,
-                              backgroundColor: blueColor,
+                              backgroundColor: lightBlueColor,
                               onPressed: () => _clientAdd(),
                             ),
                           ],

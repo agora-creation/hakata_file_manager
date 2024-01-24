@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/providers/home.dart';
+import 'package:hakata_file_manager/screens/backup.dart';
 import 'package:hakata_file_manager/screens/client.dart';
 import 'package:hakata_file_manager/screens/pdf_details.dart';
 import 'package:hakata_file_manager/services/client.dart';
@@ -85,6 +86,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       CustomIconTextButton(
+                        iconData: FluentIcons.usb,
+                        iconColor: whiteColor,
+                        labelText: 'USB間バックアップ',
+                        labelColor: whiteColor,
+                        backgroundColor: orangeColor,
+                        onPressed: () => Navigator.push(
+                          context,
+                          FluentPageRoute(
+                            builder: (context) => const BackupScreen(),
+                            fullscreenDialog: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      CustomIconTextButton(
                         iconData: FluentIcons.search,
                         iconColor: whiteColor,
                         labelText: 'ファイル検索',
@@ -100,9 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 8),
                       CustomIconTextButton(
-                        iconData: FluentIcons.settings,
+                        iconData: FluentIcons.bulleted_list,
                         iconColor: whiteColor,
-                        labelText: '取引先設定',
+                        labelText: '取引先一覧',
                         labelColor: whiteColor,
                         backgroundColor: greyColor,
                         onPressed: () => Navigator.push(
@@ -130,26 +146,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   Expanded(
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(8),
-                      gridDelegate: homeGridDelegate,
-                      itemCount: files.length,
-                      itemBuilder: (context, index) {
-                        return CustomFileCard(
-                          file: files[index],
-                          onTap: () => Navigator.push(
-                            context,
-                            FluentPageRoute(
-                              builder: (context) => PdfDetailsScreen(
+                    child: files.isNotEmpty
+                        ? GridView.builder(
+                            padding: const EdgeInsets.all(8),
+                            gridDelegate: homeGridDelegate,
+                            itemCount: files.length,
+                            itemBuilder: (context, index) {
+                              return CustomFileCard(
                                 file: files[index],
-                                getFiles: _getFiles,
-                              ),
-                              fullscreenDialog: true,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  FluentPageRoute(
+                                    builder: (context) => PdfDetailsScreen(
+                                      file: files[index],
+                                      getFiles: _getFiles,
+                                    ),
+                                    fullscreenDialog: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : const Center(
+                            child: Text(
+                              'PDFファイル情報は見つかりませんでした',
+                              style: TextStyle(fontSize: 24),
                             ),
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -257,20 +280,25 @@ class _SearchDialogState extends State<SearchDialog> {
         children: [
           InfoLabel(
             label: '取引先で絞り込み',
-            child: CustomComboBox(
-              value: clientNumber,
-              items: clients.map((e) {
-                return ComboBoxItem(
-                  value: '${e['number']}',
-                  child: Text('${e['name']}'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  clientNumber = value ?? '';
-                });
-              },
-            ),
+            child: clients.isNotEmpty
+                ? CustomComboBox(
+                    value: clientNumber,
+                    items: clients.map((e) {
+                      return ComboBoxItem(
+                        value: '${e['number']}',
+                        child: Text('${e['name']}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        clientNumber = value ?? '';
+                      });
+                    },
+                  )
+                : const Text(
+                    '取引先がいません',
+                    style: TextStyle(color: greyColor),
+                  ),
           ),
           const SizedBox(height: 8),
           InfoLabel(

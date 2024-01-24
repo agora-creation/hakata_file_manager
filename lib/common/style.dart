@@ -15,6 +15,7 @@ const blueColor = Color(0xFF2196F3);
 const lightBlueColor = Color(0xFF03A9F4);
 const tealColor = Color(0xFF009688);
 const greenColor = Color(0xFF4CAF50);
+const orangeColor = Color(0xFFFF9800);
 
 FluentThemeData themeData() {
   return FluentThemeData(

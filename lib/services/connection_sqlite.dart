@@ -22,7 +22,7 @@ class ConnectionSQLiteService {
 
   Future<Database> _openDatabase() async {
     sqfliteFfiInit();
-    final dbDirectory = await getApplicationDocumentsDirectory();
+    final dbDirectory = await getApplicationSupportDirectory();
     final dbFilePath = dbDirectory.path;
     String path = join(dbFilePath, DATABASE_NAME);
     DatabaseFactory databaseFactory = databaseFactoryFfi;
