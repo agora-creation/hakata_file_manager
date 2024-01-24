@@ -34,6 +34,10 @@ class _BackupScreenState extends State<BackupScreen> {
         await file.copy('$backupDirectoryPath2\\$fileName');
       }
     }
+    setState(() {
+      backupDirectoryPath1 = '';
+      backupDirectoryPath2 = '';
+    });
   }
 
   @override
