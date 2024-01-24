@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
+import 'package:path/path.dart' as p;
 
 class BackupScreen extends StatefulWidget {
   const BackupScreen({super.key});
@@ -15,6 +17,24 @@ class BackupScreen extends StatefulWidget {
 class _BackupScreenState extends State<BackupScreen> {
   String backupDirectoryPath1 = '';
   String backupDirectoryPath2 = '';
+
+  Future _backup() async {
+    Directory directory1 = Directory(backupDirectoryPath1);
+    Directory directory2 = Directory(backupDirectoryPath2);
+    List<FileSystemEntity> dirFiles1 = await directory1.list().toList();
+    List<FileSystemEntity> dirFiles2 = await directory2.list().toList();
+    for (var file in dirFiles2) {
+      if (file is File) {
+        await file.delete();
+      }
+    }
+    for (var file in dirFiles1) {
+      if (file is File) {
+        String fileName = p.basename(file.path);
+        await file.copy('$backupDirectoryPath2\\$fileName');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,14 +136,28 @@ class _BackupScreenState extends State<BackupScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(),
-                            CustomIconTextButton(
-                              iconData: FluentIcons.switcher_start_end,
-                              iconColor: whiteColor,
-                              labelText: 'バックアップを開始する',
-                              labelColor: whiteColor,
-                              backgroundColor: blueColor,
-                              onPressed: () {},
-                            ),
+                            backupDirectoryPath1 != '' &&
+                                    backupDirectoryPath2 != ''
+                                ? CustomIconTextButton(
+                                    iconData: FluentIcons.switcher_start_end,
+                                    iconColor: whiteColor,
+                                    labelText: 'バックアップを開始する',
+                                    labelColor: whiteColor,
+                                    backgroundColor: blueColor,
+                                    onPressed: () async {
+                                      await _backup();
+                                      if (!mounted) return;
+                                      showMessage(
+                                          context, 'バックアップに成功しました', true);
+                                    },
+                                  )
+                                : const CustomIconTextButton(
+                                    iconData: FluentIcons.switcher_start_end,
+                                    iconColor: whiteColor,
+                                    labelText: 'バックアップを開始する',
+                                    labelColor: whiteColor,
+                                    backgroundColor: greyColor,
+                                  ),
                           ],
                         ),
                       ],
