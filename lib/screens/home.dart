@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onKey: (event) async {
         if (widget.homeProvider.clientNumberFocusNode.hasFocus) return;
         if (event is RawKeyDownEvent) {
-          if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+          if (event.isKeyPressed(LogicalKeyboardKey.shiftRight)) {
             String? error = await widget.homeProvider.uploadFileSave();
             if (error != null) {
               if (!mounted) return;
