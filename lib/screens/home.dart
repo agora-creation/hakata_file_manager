@@ -214,6 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (!mounted) return;
               showMessage(context, 'PDFファイル情報を保存しました', true);
               widget.homeProvider.uploadFileClear();
+              await _getFiles();
               await widget.homeProvider.autoFocus();
             },
           ),
