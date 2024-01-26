@@ -66,10 +66,16 @@ class _HomeScreenState extends State<HomeScreen> {
             showMessage(context, 'PDFファイル情報を保存しました', true);
             widget.homeProvider.uploadFileClear();
             await widget.homeProvider.autoFocus();
+            if (widget.homeProvider.uploadFiles.isEmpty) {
+              await _getFiles();
+            }
           }
           if (event.isKeyPressed(LogicalKeyboardKey.backspace)) {
             widget.homeProvider.uploadFileClear();
             await widget.homeProvider.autoFocus();
+            if (widget.homeProvider.uploadFiles.isEmpty) {
+              await _getFiles();
+            }
           }
         }
       },
@@ -199,10 +205,16 @@ class _HomeScreenState extends State<HomeScreen> {
             allClearOnTap: () async {
               widget.homeProvider.uploadFileAllClear();
               await widget.homeProvider.autoFocus();
+              if (widget.homeProvider.uploadFiles.isEmpty) {
+                await _getFiles();
+              }
             },
             clearOnPressed: () async {
               widget.homeProvider.uploadFileClear();
               await widget.homeProvider.autoFocus();
+              if (widget.homeProvider.uploadFiles.isEmpty) {
+                await _getFiles();
+              }
             },
             saveOnPressed: () async {
               String? error = await widget.homeProvider.uploadFileSave();
@@ -214,8 +226,10 @@ class _HomeScreenState extends State<HomeScreen> {
               if (!mounted) return;
               showMessage(context, 'PDFファイル情報を保存しました', true);
               widget.homeProvider.uploadFileClear();
-              await _getFiles();
               await widget.homeProvider.autoFocus();
+              if (widget.homeProvider.uploadFiles.isEmpty) {
+                await _getFiles();
+              }
             },
           ),
         ],
