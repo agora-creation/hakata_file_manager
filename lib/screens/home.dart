@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       CustomIconTextButton(
                         iconData: FluentIcons.usb,
                         iconColor: whiteColor,
-                        labelText: 'USB間バックアップ',
+                        labelText: 'USB/HDD間バックアップ作成',
                         labelColor: whiteColor,
                         backgroundColor: orangeColor,
                         onPressed: () => Navigator.push(

@@ -22,7 +22,7 @@ class DirectoryPathHeader extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('現在接続中のファイルパス: $path'),
+            Text('現在接続中のUSB/HDDファイルパス: $path'),
             const Text(
               'クリックで変更できます',
               style: TextStyle(color: greyColor),

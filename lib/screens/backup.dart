@@ -53,7 +53,7 @@ class _BackupScreenState extends State<BackupScreen> {
               icon: const Icon(FluentIcons.back),
               onPressed: () => Navigator.pop(context),
             ),
-            const Text('USB間バックアップ', style: headerStyle),
+            const Text('USB/HDD間バックアップ作成', style: headerStyle),
             Container(),
           ],
         ),
@@ -72,11 +72,11 @@ class _BackupScreenState extends State<BackupScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'USBを2つパソコンに挿入し、片方のUSBのバックアップをとります。',
+                          'USB/HDDを2つパソコンに接続し、片方のUSB/HDDとまったく同じバックアップを作ります。',
                         ),
                         const SizedBox(height: 8),
                         InfoLabel(
-                          label: '① 元のUSBファイルパス',
+                          label: '① バックアップ元のUSB/HDDファイルパス',
                           child: ListTile(
                             tileColor: ButtonState.all(grey2Color),
                             title: backupDirectoryPath1 != ''
@@ -107,7 +107,7 @@ class _BackupScreenState extends State<BackupScreen> {
                         const Center(child: Icon(FluentIcons.down)),
                         const SizedBox(height: 8),
                         InfoLabel(
-                          label: '② バックアップ先のUSBファイルパス',
+                          label: '② バックアップ先のUSB/HDDファイルパス',
                           child: ListTile(
                             tileColor: ButtonState.all(grey2Color),
                             title: backupDirectoryPath2 != ''
