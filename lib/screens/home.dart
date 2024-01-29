@@ -321,9 +321,7 @@ class _SearchDialogState extends State<SearchDialog> {
             child: CustomTextBox(
               controller: TextEditingController(text: fileName),
               onChanged: (value) {
-                setState(() {
-                  fileName = value;
-                });
+                fileName = value;
               },
             ),
           ),
