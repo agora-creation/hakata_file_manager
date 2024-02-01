@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/services/connection_sqlite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -22,6 +23,8 @@ class FileService {
       if (searchMap['fileName'] != '') {
         sql += " and filePath like '%${searchMap['fileName']}%'";
       }
+      sql +=
+          " and createDate BETWEEN '${searchMap['createDateStart']} 00:00:00' AND '${searchMap['createDateEnd']} 23:59:59'";
       sql += ' order by id ASC';
       return await db.rawQuery(sql);
     } catch (e) {
@@ -33,6 +36,7 @@ class FileService {
     required String clientNumber,
     required String clientName,
     required File uploadFile,
+    required DateTime createDate,
   }) async {
     String? error;
     if (clientNumber == '') return '取引先番号を入力してください';
@@ -43,11 +47,13 @@ class FileService {
         insert into file (
           clientNumber,
           clientName,
-          filePath
+          filePath,
+          createDate
         ) values (
           '$clientNumber',
           '$clientName',
-          '${uploadFile.path}'
+          '${uploadFile.path}',
+          '${dateText('yyyy-MM-dd', createDate)}'
         );
       ''');
     } catch (e) {

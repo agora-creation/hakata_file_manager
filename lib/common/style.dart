@@ -42,3 +42,21 @@ const homeGridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
   mainAxisSpacing: 8,
   crossAxisSpacing: 8,
 );
+
+DateTime kFirstDate = DateTime(2020, 1, 1);
+DateTime kLastDate = DateTime(
+  DateTime.now().year,
+  DateTime.now().month + 1,
+  1,
+).subtract(const Duration(days: 1));
+
+DateTime sDefaultDateStart = DateTime(
+  DateTime.now().year,
+  DateTime.now().month,
+  1,
+);
+DateTime sDefaultDateEnd = DateTime(
+  DateTime.now().year,
+  DateTime.now().month + 1,
+  1,
+).subtract(const Duration(days: 1));

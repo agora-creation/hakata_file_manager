@@ -30,6 +30,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   file_picker: ^6.1.1
   provider: ^6.0.5
+  calendar_date_picker2: ^0.5.2
 
 dev_dependencies:
   flutter_test:
@@ -42,7 +43,7 @@ msix_config:
   display_name: 羽方青果専用ファイル管理ソフト
   publisher_display_name: 有限会社アゴラ・クリエーション
   identity_name: AB4E4D12.26750E4BFCF72
-  msix_version: 1.0.7.0
+  msix_version: 1.0.8.0
   logo_path: assets/images/icon.png
   languages: ja-jp
   publisher: CN=B7179693-D78E-46A3-AB96-E087B93111AE

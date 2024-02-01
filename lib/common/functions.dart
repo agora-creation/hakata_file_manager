@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hakata_file_manager/common/style.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,4 +70,43 @@ Future<bool> checkFileExistence(String filePath) async {
   } else {
     return false;
   }
+}
+
+Future<List<DateTime?>?> showDataPickerDialog({
+  required BuildContext context,
+  required DateTime value,
+}) async {
+  List<DateTime?>? results = await showCalendarDatePicker2Dialog(
+    context: context,
+    config: CalendarDatePicker2WithActionButtonsConfig(
+      calendarType: CalendarDatePicker2Type.single,
+      firstDate: kFirstDate,
+      lastDate: kLastDate,
+    ),
+    dialogSize: const Size(325, 400),
+    value: [value],
+    borderRadius: BorderRadius.circular(8),
+    dialogBackgroundColor: whiteColor,
+  );
+  return results;
+}
+
+Future<List<DateTime?>?> showDataRangePickerDialog({
+  required BuildContext context,
+  required DateTime startValue,
+  required DateTime endValue,
+}) async {
+  List<DateTime?>? results = await showCalendarDatePicker2Dialog(
+    context: context,
+    config: CalendarDatePicker2WithActionButtonsConfig(
+      calendarType: CalendarDatePicker2Type.range,
+      firstDate: kFirstDate,
+      lastDate: kLastDate,
+    ),
+    dialogSize: const Size(325, 400),
+    value: [startValue, endValue],
+    borderRadius: BorderRadius.circular(8),
+    dialogBackgroundColor: whiteColor,
+  );
+  return results;
 }

@@ -7,6 +7,7 @@ import 'package:hakata_file_manager/screens/backup.dart';
 import 'package:hakata_file_manager/screens/client.dart';
 import 'package:hakata_file_manager/screens/pdf_details.dart';
 import 'package:hakata_file_manager/services/client.dart';
+import 'package:hakata_file_manager/widgets/custom_calendar_field.dart';
 import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_file_card.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _init() async {
     await _getFiles();
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
     await widget.homeProvider.selectDirectory();
     await widget.homeProvider.autoFocus();
   }
@@ -195,6 +196,16 @@ class _HomeScreenState extends State<HomeScreen> {
               widget.homeProvider.uploadFileRight();
               await widget.homeProvider.autoFocus();
             },
+            createDate: widget.homeProvider.createDate,
+            dateOnPressed: () async {
+              var selected = await showDataPickerDialog(
+                context: context,
+                value: widget.homeProvider.createDate,
+              );
+              if (selected == null) return;
+              if (selected.first == null) return;
+              widget.homeProvider.dateOnChange(selected.first!);
+            },
             clientNumberFocusNode: widget.homeProvider.clientNumberFocusNode,
             clientNumberController: widget.homeProvider.clientNumberController,
             clientNumberOnSubmitted: (value) async {
@@ -255,6 +266,8 @@ class SearchDialog extends StatefulWidget {
 class _SearchDialogState extends State<SearchDialog> {
   ClientService clientService = ClientService();
   List<Map<String, String>> clients = [];
+  DateTime createDateStart = sDefaultDateStart;
+  DateTime createDateEnd = sDefaultDateEnd;
   String clientNumber = '';
   String fileName = '';
 
@@ -268,6 +281,14 @@ class _SearchDialogState extends State<SearchDialog> {
         'number': map['number'],
         'name': map['name'],
       });
+    }
+    String tmpCreateDateStart = await getPrefsString('createDateStart') ?? '';
+    if (tmpCreateDateStart != '') {
+      createDateStart = DateTime.parse(tmpCreateDateStart);
+    }
+    String tmpCreateDateEnd = await getPrefsString('createDateEnd') ?? '';
+    if (tmpCreateDateEnd != '') {
+      createDateEnd = DateTime.parse(tmpCreateDateEnd);
     }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
     clientNumber = tmpClientNumber;
@@ -293,6 +314,34 @@ class _SearchDialogState extends State<SearchDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          InfoLabel(
+            label: '登録日で絞り込み',
+            child: CustomCalendarField(
+              label:
+                  '${dateText('yyyy/MM/dd', createDateStart)} ～ ${dateText('yyyy/MM/dd', createDateEnd)}',
+              onPressed: () async {
+                var selected = await showDataRangePickerDialog(
+                  context: context,
+                  startValue: createDateStart,
+                  endValue: createDateEnd,
+                );
+                if (selected == null) return;
+                if (selected.first == null && selected.last == null) return;
+                var diff = selected.last!.difference(selected.first!);
+                int diffDays = diff.inDays;
+                if (diffDays > 365) {
+                  if (!mounted) return;
+                  showMessage(context, '一年以上の範囲は検索不可です', false);
+                  return;
+                }
+                setState(() {
+                  createDateStart = selected.first!;
+                  createDateEnd = selected.last!;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
           InfoLabel(
             label: '取引先で絞り込み',
             child: clients.isNotEmpty
@@ -330,6 +379,8 @@ class _SearchDialogState extends State<SearchDialog> {
       actions: [
         FilledButton(
           onPressed: () async {
+            await setPrefsString('createDateStart', '');
+            await setPrefsString('createDateEnd', '');
             await setPrefsString('clientNumber', '');
             await setPrefsString('fileName', '');
             await widget.getFiles();
@@ -343,6 +394,14 @@ class _SearchDialogState extends State<SearchDialog> {
         ),
         FilledButton(
           onPressed: () async {
+            await setPrefsString(
+              'createDateStart',
+              dateText('yyyy-MM-dd', createDateStart),
+            );
+            await setPrefsString(
+              'createDateEnd',
+              dateText('yyyy-MM-dd', createDateEnd),
+            );
             await setPrefsString('clientNumber', clientNumber);
             await setPrefsString('fileName', fileName);
             await widget.getFiles();

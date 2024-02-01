@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
+import 'package:hakata_file_manager/widgets/custom_calendar_field.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_text_box.dart';
 import 'package:hakata_file_manager/widgets/link_text.dart';
@@ -12,6 +14,8 @@ class CustomPdfPreview extends StatelessWidget {
   final int index;
   final Function()? leftOnPressed;
   final Function()? rightOnPressed;
+  final DateTime createDate;
+  final Function()? dateOnPressed;
   final FocusNode clientNumberFocusNode;
   final TextEditingController clientNumberController;
   final Function(String)? clientNumberOnSubmitted;
@@ -25,6 +29,8 @@ class CustomPdfPreview extends StatelessWidget {
     required this.index,
     required this.leftOnPressed,
     required this.rightOnPressed,
+    required this.createDate,
+    required this.dateOnPressed,
     required this.clientNumberFocusNode,
     required this.clientNumberController,
     required this.clientNumberOnSubmitted,
@@ -114,6 +120,17 @@ class CustomPdfPreview extends StatelessWidget {
                                       ],
                                     ),
                                     const SizedBox(height: 16),
+                                    InfoLabel(
+                                      label: '登録日',
+                                      child: CustomCalendarField(
+                                        label: dateText(
+                                          'yyyy/MM/dd',
+                                          createDate,
+                                        ),
+                                        onPressed: dateOnPressed,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
                                     InfoLabel(
                                       label: '取引先番号',
                                       child: CustomTextBox(

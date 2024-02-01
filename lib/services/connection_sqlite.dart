@@ -14,7 +14,7 @@ class ConnectionSQLiteService {
     return _instance!;
   }
 
-  static const DATABASE_NAME = 'hakata_file_manager20240201.db';
+  static const DATABASE_NAME = 'hakata_file_manager20240202.db';
   static const DATABASE_VERSION = 1;
   Database? _db;
 
@@ -52,6 +52,7 @@ class ConnectionSQLiteService {
           `clientNumber` TEXT,
           `clientName` TEXT,
           `filePath` TEXT,
+          `createDate` DATETIME,
           `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
       ''');

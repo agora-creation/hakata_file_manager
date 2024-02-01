@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/functions.dart';
+import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/services/client.dart';
 import 'package:hakata_file_manager/services/file.dart';
 import 'package:path/path.dart' as p;
@@ -13,6 +14,7 @@ class HomeProvider with ChangeNotifier {
   String selectDirectoryPath = '';
   List<File> uploadFiles = [];
   int uploadFilesIndex = 0;
+  DateTime createDate = DateTime.now();
   TextEditingController clientNumberController = TextEditingController();
   FocusNode clientNumberFocusNode = FocusNode();
   String clientName = '';
@@ -20,11 +22,23 @@ class HomeProvider with ChangeNotifier {
 
   Future<List<Map<String, String>>> getFiles() async {
     List<Map<String, String>> ret = [];
+    String createDateStart = dateText('yyyy-MM-dd', sDefaultDateStart);
+    String createDateEnd = dateText('yyyy-MM-dd', sDefaultDateEnd);
+    String tmpCreateDateStart = await getPrefsString('createDateStart') ?? '';
+    if (tmpCreateDateStart != '') {
+      createDateStart = tmpCreateDateStart;
+    }
+    String tmpCreateDateEnd = await getPrefsString('createDateEnd') ?? '';
+    if (tmpCreateDateEnd != '') {
+      createDateEnd = tmpCreateDateEnd;
+    }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
     String tmpFileName = await getPrefsString('fileName') ?? '';
     List<Map> tmpFiles = await fileService.select(searchMap: {
       'clientNumber': tmpClientNumber,
       'fileName': tmpFileName,
+      'createDateStart': createDateStart,
+      'createDateEnd': createDateEnd,
     });
     for (Map map in tmpFiles) {
       ret.add({
@@ -32,6 +46,7 @@ class HomeProvider with ChangeNotifier {
         'clientNumber': map['clientNumber'],
         'clientName': map['clientName'],
         'filePath': map['filePath'],
+        'createDate': map['createDate'],
       });
     }
     return ret;
@@ -41,6 +56,7 @@ class HomeProvider with ChangeNotifier {
     String? path = await FilePicker.platform.getDirectoryPath();
     uploadFiles.clear();
     uploadFilesIndex = 0;
+    createDate = DateTime.now();
     clientNumberController.clear();
     clientName = '';
     if (path != null) {
@@ -73,6 +89,11 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void dateOnChange(DateTime value) {
+    createDate = value;
+    notifyListeners();
+  }
+
   Future checkClientNumber() async {
     if (clientNumberController.text == '') return;
     List<Map> tmpClients = await clientService.select(searchMap: {
@@ -89,6 +110,7 @@ class HomeProvider with ChangeNotifier {
   void uploadFileAllClear() {
     uploadFiles.clear();
     uploadFilesIndex = 0;
+    createDate = DateTime.now();
     clientNumberController.clear();
     clientName = '';
     notifyListeners();
@@ -111,6 +133,7 @@ class HomeProvider with ChangeNotifier {
       clientNumber: clientNumberController.text,
       clientName: clientName,
       uploadFile: uploadFiles[uploadFilesIndex],
+      createDate: createDate,
     );
     return error;
   }

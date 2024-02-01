@@ -58,15 +58,32 @@ class CustomFileCard extends StatelessWidget {
               child: Container(
                 color: redColor.withOpacity(0.8),
                 padding: const EdgeInsets.all(4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '${file['clientName']}',
-                      style: const TextStyle(
-                        color: whiteColor,
-                        fontSize: 12,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${file['clientName']}',
+                          style: const TextStyle(
+                            color: whiteColor,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${file['createDate']}',
+                          style: const TextStyle(
+                            color: whiteColor,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
