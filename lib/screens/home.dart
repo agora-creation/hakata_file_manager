@@ -329,9 +329,9 @@ class _SearchDialogState extends State<SearchDialog> {
                 if (selected.first == null && selected.last == null) return;
                 var diff = selected.last!.difference(selected.first!);
                 int diffDays = diff.inDays;
-                if (diffDays > 365) {
+                if (diffDays > 10) {
                   if (!mounted) return;
-                  showMessage(context, '一年以上の範囲は検索不可です', false);
+                  showMessage(context, '10日以上の範囲は検索不可です', false);
                   return;
                 }
                 setState(() {

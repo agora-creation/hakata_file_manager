@@ -50,13 +50,5 @@ DateTime kLastDate = DateTime(
   1,
 ).subtract(const Duration(days: 1));
 
-DateTime sDefaultDateStart = DateTime(
-  DateTime.now().year,
-  DateTime.now().month,
-  1,
-);
-DateTime sDefaultDateEnd = DateTime(
-  DateTime.now().year,
-  DateTime.now().month + 1,
-  1,
-).subtract(const Duration(days: 1));
+DateTime sDefaultDateStart = DateTime.now().subtract(const Duration(days: 1));
+DateTime sDefaultDateEnd = DateTime.now().add(const Duration(days: 8));
