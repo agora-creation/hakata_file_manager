@@ -20,9 +20,6 @@ class FileService {
       if (searchMap['clientNumber'] != '') {
         sql += " and clientNumber like '%${searchMap['clientNumber']}%'";
       }
-      if (searchMap['fileName'] != '') {
-        sql += " and filePath like '%${searchMap['fileName']}%'";
-      }
       sql +=
           " and createDate BETWEEN '${searchMap['createDateStart']} 00:00:00' AND '${searchMap['createDateEnd']} 23:59:59'";
       sql += ' order by id ASC';

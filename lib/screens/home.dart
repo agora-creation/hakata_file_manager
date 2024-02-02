@@ -8,7 +8,6 @@ import 'package:hakata_file_manager/screens/client.dart';
 import 'package:hakata_file_manager/screens/pdf_details.dart';
 import 'package:hakata_file_manager/services/client.dart';
 import 'package:hakata_file_manager/widgets/custom_calendar_field.dart';
-import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_file_card.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_pdf_preview.dart';
@@ -269,7 +268,7 @@ class _SearchDialogState extends State<SearchDialog> {
   DateTime createDateStart = sDefaultDateStart;
   DateTime createDateEnd = sDefaultDateEnd;
   String clientNumber = '';
-  String fileName = '';
+  String clientName = '';
 
   void _init() async {
     clients.clear();
@@ -292,8 +291,6 @@ class _SearchDialogState extends State<SearchDialog> {
     }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
     clientNumber = tmpClientNumber;
-    String tmpFileName = await getPrefsString('fileName') ?? '';
-    fileName = tmpFileName;
     setState(() {});
   }
 
@@ -343,46 +340,46 @@ class _SearchDialogState extends State<SearchDialog> {
           ),
           const SizedBox(height: 8),
           InfoLabel(
-            label: '取引先で絞り込み',
-            child: clients.isNotEmpty
-                ? CustomComboBox(
-                    value: clientNumber,
-                    items: clients.map((e) {
-                      return ComboBoxItem(
-                        value: '${e['number']}',
-                        child: Text('${e['name']}'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        clientNumber = value ?? '';
-                      });
-                    },
-                  )
-                : const Text(
-                    '取引先がいません',
-                    style: TextStyle(color: greyColor),
-                  ),
+            label: '取引先番号で絞り込み',
+            child: CustomTextBox(
+              controller: TextEditingController(text: clientNumber),
+              maxLines: 1,
+              onSubmitted: (value) async {
+                clientNumber = value;
+                List<Map> tmpClients = await clientService.select(searchMap: {
+                  'number': clientNumber,
+                });
+                if (tmpClients.isNotEmpty) {
+                  clientName = tmpClients.first['name'];
+                } else {
+                  clientName = '';
+                }
+                setState(() {});
+              },
+            ),
           ),
           const SizedBox(height: 8),
           InfoLabel(
-            label: 'ファイル名で絞り込み,',
-            child: CustomTextBox(
-              controller: TextEditingController(text: fileName),
-              onChanged: (value) {
-                fileName = value;
-              },
-            ),
+            label: '取引先名(上記番号から自動取得)',
+            child: clientName != ''
+                ? Text(clientName)
+                : const Text(
+                    '取引先が見つかりません',
+                    style: TextStyle(color: greyColor),
+                  ),
           ),
         ],
       ),
       actions: [
         FilledButton(
           onPressed: () async {
+            createDateStart = sDefaultDateStart;
+            createDateEnd = sDefaultDateEnd;
+            clientNumber = '';
+            clientName = '';
             await setPrefsString('createDateStart', '');
             await setPrefsString('createDateEnd', '');
             await setPrefsString('clientNumber', '');
-            await setPrefsString('fileName', '');
             await widget.getFiles();
             if (!mounted) return;
             Navigator.pop(context);
@@ -403,7 +400,6 @@ class _SearchDialogState extends State<SearchDialog> {
               dateText('yyyy-MM-dd', createDateEnd),
             );
             await setPrefsString('clientNumber', clientNumber);
-            await setPrefsString('fileName', fileName);
             await widget.getFiles();
             if (!mounted) return;
             Navigator.pop(context);

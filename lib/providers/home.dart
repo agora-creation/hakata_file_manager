@@ -33,10 +33,8 @@ class HomeProvider with ChangeNotifier {
       createDateEnd = tmpCreateDateEnd;
     }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
-    String tmpFileName = await getPrefsString('fileName') ?? '';
     List<Map> tmpFiles = await fileService.select(searchMap: {
       'clientNumber': tmpClientNumber,
-      'fileName': tmpFileName,
       'createDateStart': createDateStart,
       'createDateEnd': createDateEnd,
     });
