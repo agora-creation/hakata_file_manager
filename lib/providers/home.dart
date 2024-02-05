@@ -20,6 +20,10 @@ class HomeProvider with ChangeNotifier {
   String clientName = '';
   FocusNode keyboardFocusNode = FocusNode();
 
+  String searchCreateDateStart = '';
+  String searchCreateDateEnd = '';
+  String searchClientNumber = '';
+
   Future<List<Map<String, String>>> getFiles() async {
     List<Map<String, String>> ret = [];
     String createDateStart = dateText('yyyy-MM-dd', sDefaultDateStart);
@@ -33,6 +37,10 @@ class HomeProvider with ChangeNotifier {
       createDateEnd = tmpCreateDateEnd;
     }
     String tmpClientNumber = await getPrefsString('clientNumber') ?? '';
+    searchCreateDateStart = createDateStart;
+    searchCreateDateEnd = createDateEnd;
+    searchClientNumber = tmpClientNumber;
+    notifyListeners();
     List<Map> tmpFiles = await fileService.select(searchMap: {
       'clientNumber': tmpClientNumber,
       'createDateStart': createDateStart,

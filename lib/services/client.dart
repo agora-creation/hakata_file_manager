@@ -17,7 +17,20 @@ class ClientService {
       if (searchMap['number'] != '') {
         sql += " and number like '${searchMap['number']}'";
       }
-      sql += ' order by id ASC';
+      if (searchMap['name'] != '') {
+        sql += " and name like '${searchMap['name']}'";
+      }
+      if (searchMap['orderBy'] == 'numberASC') {
+        sql += ' order by number ASC';
+      } else if (searchMap['orderBy'] == 'numberDESC') {
+        sql += ' order by number DESC';
+      } else if (searchMap['orderBy'] == 'nameASC') {
+        sql += ' order by name ASC';
+      } else if (searchMap['orderBy'] == 'nameDESC') {
+        sql += ' order by name DESC';
+      } else {
+        sql += ' order by number ASC';
+      }
       return await db.rawQuery(sql);
     } catch (e) {
       throw Exception();

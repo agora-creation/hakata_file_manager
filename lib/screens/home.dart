@@ -13,6 +13,7 @@ import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_pdf_preview.dart';
 import 'package:hakata_file_manager/widgets/custom_text_box.dart';
 import 'package:hakata_file_manager/widgets/directory_path_header.dart';
+import 'package:hakata_file_manager/widgets/search_criteria_header.dart';
 
 class HomeScreen extends StatefulWidget {
   final HomeProvider homeProvider;
@@ -144,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: mainColor,
               child: Column(
                 children: [
+                  SearchCriteriaHeader(homeProvider: widget.homeProvider),
                   DirectoryPathHeader(
                     path: widget.homeProvider.selectDirectoryPath,
                     onTap: () async {

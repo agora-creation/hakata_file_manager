@@ -3,6 +3,7 @@ import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:hakata_file_manager/services/client.dart';
 import 'package:hakata_file_manager/widgets/custom_client_table.dart';
+import 'package:hakata_file_manager/widgets/custom_combo_box.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_button.dart';
 import 'package:hakata_file_manager/widgets/custom_icon_text_button.dart';
 import 'package:hakata_file_manager/widgets/custom_text_box.dart';
@@ -16,6 +17,8 @@ class ClientScreen extends StatefulWidget {
 
 class _ClientScreenState extends State<ClientScreen> {
   ClientService clientService = ClientService();
+  String clientSort = kClientSorts.first;
+  String keyword = '';
   List<Map<String, String>> clients = [];
   List<TableRow> clientRows = [];
 
@@ -74,8 +77,27 @@ class _ClientScreenState extends State<ClientScreen> {
 
   void _init() async {
     clients.clear();
+    String name = '';
+    String orderBy = '';
+    name = keyword;
+    switch (clientSort) {
+      case '番号(昇順)':
+        orderBy = 'numberASC';
+        break;
+      case '番号(降順)':
+        orderBy = 'numberDESC';
+        break;
+      case '名前(昇順)':
+        orderBy = 'nameASC';
+        break;
+      case '名前(降順)':
+        orderBy = 'nameDESC';
+        break;
+    }
     List<Map> tmpClients = await clientService.select(searchMap: {
       'number': '',
+      'name': name,
+      'orderBy': orderBy,
     });
     for (Map map in tmpClients) {
       clients.add({
@@ -84,6 +106,28 @@ class _ClientScreenState extends State<ClientScreen> {
       });
     }
     _rebuildClientRows();
+  }
+
+  void _setKeyword(String value) {
+    setState(() {
+      keyword = value;
+    });
+  }
+
+  Future _save() async {
+    String? error;
+    await clientService.clear();
+    clients.forEach((map) async {
+      error = await clientService.insert(
+        number: '${map['number']}',
+        name: '${map['name']}',
+      );
+    });
+    if (error != null) {
+      if (!mounted) return;
+      showMessage(context, error!, false);
+      return;
+    }
   }
 
   @override
@@ -106,29 +150,53 @@ class _ClientScreenState extends State<ClientScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             const Text('取引先一覧', style: headerStyle),
-            CustomIconTextButton(
-              iconData: FluentIcons.save,
-              iconColor: whiteColor,
-              labelText: '以下の内容で保存する',
-              labelColor: whiteColor,
-              backgroundColor: blueColor,
-              onPressed: () async {
-                String? error;
-                await clientService.clear();
-                clients.forEach((map) async {
-                  error = await clientService.insert(
-                    number: '${map['number']}',
-                    name: '${map['name']}',
-                  );
-                });
-                if (error != null) {
-                  if (!mounted) return;
-                  showMessage(context, error!, false);
-                  return;
-                }
-                if (!mounted) return;
-                showMessage(context, '取引先設定を保存しました', true);
-              },
+            Row(
+              children: [
+                CustomIconTextButton(
+                  iconData: FluentIcons.search,
+                  iconColor: whiteColor,
+                  labelText: 'キーワード検索: $keyword',
+                  labelColor: whiteColor,
+                  backgroundColor: lightBlueColor,
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => KeywordDialog(
+                      keyword: keyword,
+                      init: _init,
+                      setKeyword: _setKeyword,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                CustomComboBox(
+                  value: clientSort,
+                  items: kClientSorts.map((e) {
+                    return ComboBoxItem(
+                      value: e,
+                      child: Text(e),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      clientSort = value!;
+                    });
+                    _init();
+                  },
+                ),
+                const SizedBox(width: 8),
+                CustomIconTextButton(
+                  iconData: FluentIcons.save,
+                  iconColor: whiteColor,
+                  labelText: '以下の内容で保存する',
+                  labelColor: whiteColor,
+                  backgroundColor: blueColor,
+                  onPressed: () async {
+                    await _save();
+                    if (!mounted) return;
+                    showMessage(context, '取引先設定を保存しました', true);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -146,6 +214,14 @@ class _ClientScreenState extends State<ClientScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          '※必ず上部の『以下の内容で保存する』ボタンを押してください。入力しただけでは保存されません。',
+                          style: TextStyle(
+                            color: redColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const Text(
                           'ここで取引先情報を登録できます。PDFファイル情報を保存する際に必要になりますので、かならず1つ以上登録してください。',
                         ),
@@ -175,6 +251,78 @@ class _ClientScreenState extends State<ClientScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class KeywordDialog extends StatefulWidget {
+  final String keyword;
+  final Function() init;
+  final Function(String) setKeyword;
+
+  const KeywordDialog({
+    required this.keyword,
+    required this.init,
+    required this.setKeyword,
+    super.key,
+  });
+
+  @override
+  State<KeywordDialog> createState() => _KeywordDialogState();
+}
+
+class _KeywordDialogState extends State<KeywordDialog> {
+  TextEditingController keywordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    keywordController.text = widget.keyword;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentDialog(
+      title: const Text(
+        'キーワード検索',
+        style: TextStyle(fontSize: 16),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextBox(
+            controller: keywordController,
+            maxLines: 1,
+          ),
+        ],
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () async {
+            widget.setKeyword('');
+            await widget.init();
+            if (!mounted) return;
+            Navigator.pop(context);
+          },
+          style: ButtonStyle(
+            backgroundColor: ButtonState.all(greyColor),
+          ),
+          child: const Text('検索クリア'),
+        ),
+        FilledButton(
+          onPressed: () async {
+            widget.setKeyword(keywordController.text);
+            await widget.init();
+            if (!mounted) return;
+            Navigator.pop(context);
+          },
+          style: ButtonStyle(
+            backgroundColor: ButtonState.all(blueColor),
+          ),
+          child: const Text('検索実行'),
+        ),
+      ],
     );
   }
 }

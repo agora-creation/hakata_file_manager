@@ -15,7 +15,6 @@ class CustomComboBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ComboBox<String>(
-      isExpanded: true,
       value: value,
       items: items,
       onChanged: onChanged,

@@ -52,3 +52,5 @@ DateTime kLastDate = DateTime(
 
 DateTime sDefaultDateStart = DateTime.now().subtract(const Duration(days: 1));
 DateTime sDefaultDateEnd = DateTime.now().add(const Duration(days: 8));
+
+List<String> kClientSorts = ['番号(昇順)', '番号(降順)', '名前(昇順)', '名前(降順)'];
