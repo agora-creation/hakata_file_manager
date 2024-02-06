@@ -1,3 +1,4 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/functions.dart';
 import 'package:hakata_file_manager/common/style.dart';
@@ -75,7 +76,7 @@ class _ClientScreenState extends State<ClientScreen> {
     setState(() {});
   }
 
-  void _init() async {
+  Future _init() async {
     clients.clear();
     String name = '';
     String orderBy = '';
@@ -145,13 +146,15 @@ class _ClientScreenState extends State<ClientScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: const Icon(FluentIcons.back),
-              onPressed: () => Navigator.pop(context),
-            ),
-            const Text('取引先一覧', style: headerStyle),
             Row(
               children: [
+                IconButton(
+                  icon: const Icon(FluentIcons.back),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const SizedBox(width: 8),
+                const Text('取引先一覧', style: headerStyle),
+                const SizedBox(width: 16),
                 CustomIconTextButton(
                   iconData: FluentIcons.search,
                   iconColor: whiteColor,
@@ -160,7 +163,7 @@ class _ClientScreenState extends State<ClientScreen> {
                   backgroundColor: lightBlueColor,
                   onPressed: () => showDialog(
                     context: context,
-                    builder: (context) => KeywordDialog(
+                    builder: (context) => SearchDialog(
                       keyword: keyword,
                       init: _init,
                       setKeyword: _setKeyword,
@@ -185,6 +188,41 @@ class _ClientScreenState extends State<ClientScreen> {
                 ),
                 const SizedBox(width: 8),
                 CustomIconTextButton(
+                  iconData: FluentIcons.upload,
+                  iconColor: whiteColor,
+                  labelText: 'CSVアップロード',
+                  labelColor: whiteColor,
+                  backgroundColor: greenColor,
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => UploadDialog(
+                      init: _init,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                CustomIconTextButton(
+                  iconData: FluentIcons.download,
+                  iconColor: whiteColor,
+                  labelText: 'CSVダウンロード',
+                  labelColor: whiteColor,
+                  backgroundColor: greenColor,
+                  onPressed: () async {
+                    List<String> header = ['番号', '名前'];
+                    List<List<String>> rows = clients.map((e) {
+                      return ['${e['number']}', '${e['name']}'];
+                    }).toList();
+                    await downloadCSV(
+                      header: header,
+                      rows: rows,
+                    );
+                  },
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                CustomIconTextButton(
                   iconData: FluentIcons.save,
                   iconColor: whiteColor,
                   labelText: '以下の内容で保存する',
@@ -195,6 +233,15 @@ class _ClientScreenState extends State<ClientScreen> {
                     if (!mounted) return;
                     showMessage(context, '取引先設定を保存しました', true);
                   },
+                ),
+                const SizedBox(width: 8),
+                CustomIconTextButton(
+                  iconData: FluentIcons.add,
+                  iconColor: whiteColor,
+                  labelText: '入力欄を追加',
+                  labelColor: whiteColor,
+                  backgroundColor: lightBlueColor,
+                  onPressed: () => _clientAdd(),
                 ),
               ],
             ),
@@ -226,22 +273,6 @@ class _ClientScreenState extends State<ClientScreen> {
                           'ここで取引先情報を登録できます。PDFファイル情報を保存する際に必要になりますので、かならず1つ以上登録してください。',
                         ),
                         CustomClientTable(rows: clientRows),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(),
-                            CustomIconTextButton(
-                              iconData: FluentIcons.add,
-                              iconColor: whiteColor,
-                              labelText: '入力欄を追加',
-                              labelColor: whiteColor,
-                              backgroundColor: lightBlueColor,
-                              onPressed: () => _clientAdd(),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -255,12 +286,12 @@ class _ClientScreenState extends State<ClientScreen> {
   }
 }
 
-class KeywordDialog extends StatefulWidget {
+class SearchDialog extends StatefulWidget {
   final String keyword;
   final Function() init;
   final Function(String) setKeyword;
 
-  const KeywordDialog({
+  const SearchDialog({
     required this.keyword,
     required this.init,
     required this.setKeyword,
@@ -268,10 +299,10 @@ class KeywordDialog extends StatefulWidget {
   });
 
   @override
-  State<KeywordDialog> createState() => _KeywordDialogState();
+  State<SearchDialog> createState() => _SearchDialogState();
 }
 
-class _KeywordDialogState extends State<KeywordDialog> {
+class _SearchDialogState extends State<SearchDialog> {
   TextEditingController keywordController = TextEditingController();
 
   @override
@@ -323,6 +354,127 @@ class _KeywordDialogState extends State<KeywordDialog> {
           child: const Text('検索実行'),
         ),
       ],
+    );
+  }
+}
+
+class UploadDialog extends StatefulWidget {
+  final Function() init;
+
+  const UploadDialog({
+    required this.init,
+    super.key,
+  });
+
+  @override
+  State<UploadDialog> createState() => _UploadDialogState();
+}
+
+class _UploadDialogState extends State<UploadDialog> {
+  ClientService clientService = ClientService();
+  XFile? uploadFile;
+  bool isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentDialog(
+      title: const Text(
+        'CSVアップロード',
+        style: TextStyle(fontSize: 16),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '※CSVファイルの文字コードは「utf-8」にしてください。',
+            style: TextStyle(
+              color: redColor,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FilledButton(
+                onPressed: () async {
+                  XTypeGroup group = const XTypeGroup(
+                    label: 'CSVファイル',
+                    extensions: ['csv'],
+                  );
+                  XFile? result = await openFile(acceptedTypeGroups: [group]);
+                  if (result == null) return;
+                  setState(() {
+                    uploadFile = result;
+                  });
+                },
+                style: ButtonStyle(
+                  backgroundColor: ButtonState.all(greenColor),
+                ),
+                child: const Text('CSVファイル選択'),
+              ),
+              const SizedBox(height: 4),
+              uploadFile != null
+                  ? Text(
+                      '${uploadFile?.name}',
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : Container(),
+            ],
+          ),
+        ],
+      ),
+      actions: isLoading
+          ? null
+          : [
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                style: ButtonStyle(
+                  backgroundColor: ButtonState.all(greyColor),
+                ),
+                child: const Text('キャンセル'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (uploadFile == null) return;
+                  setState(() {
+                    isLoading = true;
+                  });
+                  String csvText = await uploadFile!.readAsString();
+                  List<List<String>> csvData = [];
+                  int lineCount = 0;
+                  for (String line in csvText.split('\n')) {
+                    if (lineCount != 0 && line != '') {
+                      List<String> rows = line.split(',');
+                      csvData.add(rows);
+                    }
+                    lineCount++;
+                  }
+                  String? error;
+                  await clientService.clear();
+                  csvData.forEach((data) async {
+                    data.add('');
+                    error = await clientService.insert(
+                      number: data[0],
+                      name: data[1],
+                    );
+                  });
+                  if (error != null) {
+                    if (!mounted) return;
+                    showMessage(context, error!, false);
+                    return;
+                  }
+                  await widget.init();
+                  if (!mounted) return;
+                  Navigator.pop(context);
+                },
+                style: ButtonStyle(
+                  backgroundColor: ButtonState.all(blueColor),
+                ),
+                child: const Text('アップロード実行'),
+              ),
+            ],
     );
   }
 }

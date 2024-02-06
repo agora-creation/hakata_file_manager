@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:csv/csv.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hakata_file_manager/common/style.dart';
 import 'package:intl/intl.dart';
@@ -109,4 +112,31 @@ Future<List<DateTime?>?> showDataRangePickerDialog({
     dialogBackgroundColor: whiteColor,
   );
   return results;
+}
+
+Future downloadCSV({
+  required List<String> header,
+  required List<List<String>> rows,
+}) async {
+  String fileName = '${dateText('yyyyMMddHHmmss', DateTime.now())}.csv';
+  String csv = const ListToCsvConverter().convert(
+    [header, ...rows],
+  );
+  String bom = '\uFEFF';
+  String csvText = bom + csv;
+  csvText = csvText.replaceAll('[', '');
+  csvText = csvText.replaceAll(']', '');
+  String? path = await getSavePath(
+    acceptedTypeGroups: [
+      const XTypeGroup(
+        label: 'csv',
+        extensions: ['csv'],
+      )
+    ],
+    suggestedName: fileName,
+  );
+  if (path == null) return;
+  final data = const Utf8Encoder().convert(csvText);
+  final file = XFile.fromData(data, mimeType: 'text/plain');
+  await file.saveTo(path);
 }
