@@ -18,7 +18,7 @@ class ClientService {
         sql += " and number like '${searchMap['number']}'";
       }
       if (searchMap['name'] != '') {
-        sql += " and name like '${searchMap['name']}'";
+        sql += " and name like '%${searchMap['name']}%'";
       }
       if (searchMap['orderBy'] == 'numberASC') {
         sql += ' order by number ASC';
