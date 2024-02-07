@@ -21,15 +21,15 @@ class ClientService {
         sql += " and name like '%${searchMap['name']}%'";
       }
       if (searchMap['orderBy'] == 'numberASC') {
-        sql += ' order by number ASC';
+        sql += ' order by convert(int, number) ASC';
       } else if (searchMap['orderBy'] == 'numberDESC') {
-        sql += ' order by number DESC';
+        sql += ' order by convert(int, number) DESC';
       } else if (searchMap['orderBy'] == 'nameASC') {
         sql += ' order by name ASC';
       } else if (searchMap['orderBy'] == 'nameDESC') {
         sql += ' order by name DESC';
       } else {
-        sql += ' order by number ASC';
+        sql += ' order by convert(int, number) ASC';
       }
       return await db.rawQuery(sql);
     } catch (e) {

@@ -240,7 +240,7 @@ class _ClientScreenState extends State<ClientScreen> {
                   iconColor: whiteColor,
                   labelText: '入力欄を追加',
                   labelColor: whiteColor,
-                  backgroundColor: lightBlueColor,
+                  backgroundColor: greyColor,
                   onPressed: () => _clientAdd(),
                 ),
               ],
