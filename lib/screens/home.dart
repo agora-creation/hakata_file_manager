@@ -276,6 +276,8 @@ class _SearchDialogState extends State<SearchDialog> {
     clients.clear();
     List<Map> tmpClients = await clientService.select(searchMap: {
       'number': '',
+      'name': '',
+      'orderBy': '',
     });
     for (Map map in tmpClients) {
       clients.add({
@@ -350,6 +352,8 @@ class _SearchDialogState extends State<SearchDialog> {
                 clientNumber = value;
                 List<Map> tmpClients = await clientService.select(searchMap: {
                   'number': clientNumber,
+                  'name': '',
+                  'orderBy': '',
                 });
                 if (tmpClients.isNotEmpty) {
                   clientName = tmpClients.first['name'];

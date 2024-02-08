@@ -104,6 +104,8 @@ class HomeProvider with ChangeNotifier {
     if (clientNumberController.text == '') return;
     List<Map> tmpClients = await clientService.select(searchMap: {
       'number': clientNumberController.text,
+      'name': '',
+      'orderBy': '',
     });
     if (tmpClients.isNotEmpty) {
       clientName = tmpClients.first['name'];
