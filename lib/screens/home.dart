@@ -93,6 +93,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       CustomIconTextButton(
+                        iconData: FluentIcons.fabric_sync_folder,
+                        iconColor: whiteColor,
+                        labelText: 'フォルダ選択',
+                        labelColor: whiteColor,
+                        backgroundColor: greyColor,
+                        onPressed: () async {
+                          await widget.homeProvider.selectDirectory();
+                          await widget.homeProvider.autoFocus();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      CustomIconTextButton(
                         iconData: FluentIcons.usb,
                         iconColor: whiteColor,
                         labelText: 'USB/HDD間バックアップ作成',
