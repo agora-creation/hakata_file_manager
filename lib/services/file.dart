@@ -20,12 +20,32 @@ class FileService {
       if (searchMap['clientNumber'] != '') {
         sql += " and clientNumber like '%${searchMap['clientNumber']}%'";
       }
-      sql +=
-          " and createDate BETWEEN '${searchMap['createDateStart']} 00:00:00' AND '${searchMap['createDateEnd']} 23:59:59'";
+      if (searchMap['createDateStart'] != '' &&
+          searchMap['createDateStart'] != '') {
+        sql += " and (";
+        sql += " createDate BETWEEN '${searchMap['createDateStart']} 00:00:00'";
+        sql += " AND";
+        sql += " '${searchMap['createDateEnd']} 23:59:59'";
+        sql += " )";
+      }
       sql += ' order by id ASC';
       return await db.rawQuery(sql);
     } catch (e) {
       throw Exception();
+    }
+  }
+
+  Future<bool> alreadyCheck(String filePath) async {
+    if (filePath == '') return true;
+    Database db = await _getDatabase();
+    String sql = 'select * from file where id != 0';
+    sql += " and filePath like '$filePath'";
+    sql += ' order by id ASC';
+    List<Map> files = await db.rawQuery(sql);
+    if (files.isEmpty) {
+      return false;
+    } else {
+      return true;
     }
   }
 

@@ -73,7 +73,10 @@ class HomeProvider with ChangeNotifier {
         if (file is File) {
           String extension = p.extension(file.path);
           if (extension == '.pdf') {
-            uploadFiles.add(file);
+            String filePath = file.path;
+            if (!await fileService.alreadyCheck(filePath)) {
+              uploadFiles.add(file);
+            }
           }
         }
       }
